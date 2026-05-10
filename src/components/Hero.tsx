@@ -2,7 +2,28 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight } from "lucide-react";
 import heroImg from "@/assets/hero-robotics.jpg";
 
+import { useEffect, useState } from "react";
+import { fetchPagina } from "@/utils/fetchPagina";
+import { parseContent } from "@/utils/parseContent";
+
+type Conteudo = ReturnType<typeof parseContent>;
+
 const Hero = () => {
+
+  const [conteudo, setConteudo] = useState<Conteudo | null>(null);
+  useEffect(() => {
+  fetchPagina("pagina-1")
+  .then(pagina => {
+  // fetchPagina trouxe o JSON completo da página
+  // parseContent separa o HTML em paragrafos, titulos, imagens...
+  const elementos = parseContent(pagina.content.rendered);
+  setConteudo(elementos);
+  })
+  .catch(() => {
+  console.warn("Não foi possível buscar o conteúdo do WordPress.");
+  });
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center bg-gradient-hero overflow-hidden pt-20">
       <div className="absolute inset-0 grid-pattern opacity-40" />
@@ -17,11 +38,11 @@ const Hero = () => {
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight">
-            Transforme curiosidade em <span className="text-gradient-primary">inovação</span>.
+            {conteudo?.titulos[0]?.textContent} <span className="text-gradient-primary">{conteudo?.titulos[1]?.textContent}</span>.
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl">
-            Aprenda robótica, programação e automação com projetos reais e prepare-se para as profissões do futuro.
+            {conteudo?.paragrafos[0]?.textContent}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
